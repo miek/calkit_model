@@ -118,6 +118,40 @@ class OpenParams(Params):
         return ret
 
 
+class LoadParams(Params):
+    def __init__(self, args):
+        self._model_func = keysight_calkit_load
+
+        self._initial_guess = [
+            40,
+            3.21e9,
+            50,
+        ]
+
+        self._bounds = [
+            (0, 1000),
+            (0, 1e12),
+            (1, 1000),
+        ]
+
+        self._units = np.array([
+            1e-12,
+            1,
+            1,
+        ])
+
+    def scpi_commands(self, prefix, x):
+        ret = [prefix + ":TYPE LOAD"]
+        params = [
+            'DEL',
+            'LOSS',
+            'Z0',
+        ]
+        for i in range(len(x)):
+            ret.append(f"{prefix}:{params[i]} {x[i]}")
+        return ret
+
+
 def error_complex(n1, n2):
     return n1.s[:,0,0] - n2.s[:,0,0]
 
@@ -198,6 +232,8 @@ if args.type == 'short':
     params = ShortParams(args)
 elif args.type == 'open':
     params = OpenParams(args)
+elif args.type == 'load':
+    params = LoadParams(args)
 else:
     raise NotImplementedError
 
